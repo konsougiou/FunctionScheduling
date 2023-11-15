@@ -9,7 +9,7 @@ int main(){
         {1, 31}, {2, 1}, {3, 8}, {4, 3}, {5, 2},
         {6, 16}, {7, 6}, {8, 7}, {9, 8}, {10, 9},
         {11, 1}, {12, 5}, {13, 12}, {14, 13}, {15, 11},
-        {16, 5}, {17, 16}, {18, 17}, {19, 18}, {20, 19},
+        {16, 5}, {17, 16}, {17, 15}, {18, 17}, {19, 18}, {20, 19},
         {21, 18}, {22, 21}, {23, 22}, {24, 5}, {25, 24},
         {26, 25}, {27, 26}, {28, 26}, {29, 28}, {30, 4},
         {30, 10}, {30, 14}, {30, 20}, {30, 23}, {29, 27},
@@ -47,6 +47,14 @@ int main(){
         tabuProcessingTimePerType,
         tabuDueDates,
         tabuNodeNames);
+
+    for(auto pair: tabuWorkflow.dependenciesPerJob){
+        std::cout<< "Job "<<pair.first<<": "<<std::endl;
+        for (auto dep: pair.second){
+            std::cout<<dep <<", ";
+        }
+        std::cout<<std::endl;
+    }
 
 
     auto taboScheduler = TabuScheduler();

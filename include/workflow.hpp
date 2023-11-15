@@ -24,7 +24,12 @@ public:
 
     std::unordered_map<int, int> processingTimes;
 
-    std::unordered_set<int> completedJobs;
+    // In the construcotr of the workflow, we find for each job, all the jobs in depends on.
+    // Although this introduces an bigO(numJobs^2) memory cost in the worst case, it saves a 
+    // lot of runtime during the algorithm execution
+    std::unordered_map<int, std::unordered_set<int> > dependenciesPerJob;
 
     std::string getNodeType(int nodeNumber);
+
+    void populateDependenciesPerJob();
 };
