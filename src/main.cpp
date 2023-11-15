@@ -1,6 +1,5 @@
 #include <iostream>
-#include "tabuScheduler.hpp"
-#include "workflow.hpp"
+#include "../include/tabuScheduler.hpp"
 
 
 int main(){
@@ -51,7 +50,7 @@ int main(){
 
 
     auto taboScheduler = TabuScheduler();
-    auto schedule = taboScheduler.createSchedule();
+    //auto schedule = taboScheduler.createSchedule();
 
     return 0;
 };
