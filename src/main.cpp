@@ -48,17 +48,26 @@ int main(){
         tabuDueDates,
         tabuNodeNames);
 
-    for(auto pair: tabuWorkflow.dependenciesPerJob){
-        std::cout<< "Job "<<pair.first<<": "<<std::endl;
-        for (auto dep: pair.second){
-            std::cout<<dep <<", ";
-        }
-        std::cout<<std::endl;
-    }
+    // for(auto pair: tabuWorkflow.dependenciesPerJob){
+    //     std::cout<< "Job "<<pair.first<<": "<<std::endl;
+    //     for (auto dep: pair.second){
+    //         std::cout<<dep <<", ";
+    //     }
+    //     std::cout<<std::endl;
+    // }
 
+    std::vector<int> x0 = {30, 29, 23, 10, 9, 14, 13, 12, 4, 20,
+                            22, 3, 27, 28, 8, 7, 19, 21, 26, 18, 25,
+                            17, 15, 6, 24, 16, 5, 11, 2, 1, 31};
 
     auto taboScheduler = TabuScheduler();
-    //auto schedule = taboScheduler.createSchedule();
+    auto schedule = taboScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 70);
+    std::cout<< taboScheduler.getTotalTardiness(schedule, tabuWorkflow) <<std::endl;
+    for (int job: schedule){
+        std::cout<< job << ", ";
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
 
     return 0;
 };
