@@ -2,6 +2,13 @@
 #include "../include/tabuScheduler.hpp"
 
 
+
+
+int t(){
+    return 1;
+}
+
+
 int main(){
 
 
@@ -16,10 +23,16 @@ int main(){
         {30, 29}
     };
 
-    std::unordered_map<std::string, int> tabuProcessingTimePerType = {
-        {"vii", 14}, {"blur", 5}, {"night", 18},
-        {"onnx" ,3}, {"emboss", 2}, {"muse", 10}, 
-        {"wave", 6}
+    std::unordered_map<std::string, double> measuredProcessingTimePerType = {
+        {"vii", 15.1445}, {"blur", 5.7327}, {"night", 18.7298},
+        {"onnx" ,2.9760}, {"emboss", 1.7426}, {"muse", 10.9523}, 
+        {"wave", 6.7323}
+    };
+
+    std::unordered_map<std::string, double> preSetProcessingTimePerType = {
+        {"vii", 14.0}, {"blur", 5.0}, {"night", 18.0},
+        {"onnx" ,3.0}, {"emboss", 2.0}, {"muse", 10.0}, 
+        {"wave", 6.0}
     };
 
     std::unordered_map<int, int> tabuDueDates = {
@@ -44,35 +57,83 @@ int main(){
 
     Workflow tabuWorkflow = Workflow(
         tabuEdges, 
-        tabuProcessingTimePerType,
+        preSetProcessingTimePerType,
         tabuDueDates,
         tabuNodeNames);
 
-    // for(auto pair: tabuWorkflow.dependenciesPerJob){
-    //     std::cout<< "Job "<<pair.first<<": "<<std::endl;
-    //     for (auto dep: pair.second){
-    //         std::cout<<dep <<", ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
 
     std::vector<int> x0 = {30, 29, 23, 10, 9, 14, 13, 12, 4, 20,
                             22, 3, 27, 28, 8, 7, 19, 21, 26, 18, 25,
                             17, 15, 6, 24, 16, 5, 11, 2, 1, 31};
 
-    auto taboScheduler = TabuScheduler();
-    auto schedule = taboScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 70);
-    std::cout<< taboScheduler.getTotalTardiness(schedule, tabuWorkflow) <<std::endl;
-    for (int job: schedule){
+    auto tabuScheduler = TabuScheduler();
+    auto tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 150, false);
+    std::cout<< tabuScheduler.getTotalTardiness(tabuSchedule, tabuWorkflow) <<std::endl;
+    for (int job: tabuSchedule){
         std::cout<< job << ", ";
     }
     std::cout << std::endl;
     std::cout << std::endl;
 
+
+    //////
+    //MEASURED TIMES
+    //////
+
+
+    Workflow measuredTimesTabuWorkflow = Workflow(
+            tabuEdges, 
+            measuredProcessingTimePerType,
+            tabuDueDates,
+            tabuNodeNames);
+
+    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, 8, 25, 1000, false);
+    std::cout<< tabuScheduler.getTotalTardiness(measuredTabuSchedule, tabuWorkflow) <<std::endl;
+    for (int job: measuredTabuSchedule){
+        std::cout<< job << ", ";
+    }
+
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 30, 100, true);
+        for (int job: bestMeasuredTabuSchedule){
+        std::cout<< job << ", ";
+    }
+
+
+
+    ////
+    //TESTING
+    ////
+
+    std::unordered_map<std::string, double> testProcessingTimePerType = {
+        {"vii", 10.0}, {"blur", 10.0}, {"night", 13.0},
+        {"onnx" ,4.0}};
+
+    std::unordered_map<int, int> testTabuDueDates = {
+      {1, 4}, {2, 2}, {3, 1}, {4, 12}};
+
+    std::unordered_map<int, std::string> testTabuNodeNames = {
+        {1, "vii"}, {2, "blur"}, {3, "night"}, {4, "onnx"} 
+    }; 
+    std::vector<std::vector<int> > testTabuEdges;
+
+    Workflow testTabuWorkflow = Workflow(
+            testTabuEdges, 
+            testProcessingTimePerType,
+            testTabuDueDates,
+            testTabuNodeNames);
+
+    x0 = {2, 1, 4, 3};
+
+    auto testTaboScheduler = TabuScheduler();
+    //schedule = testTaboScheduler.createSchedule(testTabuWorkflow, x0, 10, 5, 20, true);
+    //std::cout<< testTaboScheduler.getTotalTardiness(schedule, testTabuWorkflow) <<std::endl;
+    // for (int job: schedule){
+    //     std::cout<< job << ", ";
+    // }
+
+
     return 0;
-};
-
-
-
-
-
+}

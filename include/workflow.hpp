@@ -10,7 +10,7 @@ public:
 
     Workflow(
         std::vector<std::vector<int> > edges, 
-        std::unordered_map<std::string, int> processingTimePerType,
+        std::unordered_map<std::string, double> processingTimePerType,
         std::unordered_map<int, int> dueDates,
         std::unordered_map<int, std::string> nodeNames
         );
@@ -21,7 +21,7 @@ public:
 
     std::unordered_map<int, int> dueDates;
 
-    std::unordered_map<int, int> processingTimes;
+    std::unordered_map<int, double> processingTimes;
 
     // In the construcotr of the workflow, we find for each job, all the jobs in depends on.
     // Although this introduces an bigO(numJobs^2) memory cost in the worst case, it saves a 
