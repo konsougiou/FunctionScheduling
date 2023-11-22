@@ -60,15 +60,20 @@ int main(){
                             22, 3, 27, 28, 8, 7, 19, 21, 26, 18, 25,
                             17, 15, 6, 24, 16, 5, 11, 2, 1, 31};
 
+    std::vector<double> tardinessHistory;
+
     auto tabuScheduler = TabuScheduler();
-    auto tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 1000, false);
+    auto tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, tardinessHistory, 10, 10, 20, 1000, false);
     double totalTardiness = tabuScheduler.getTotalTardiness(tabuSchedule, tabuWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: tabuSchedule){
         std::cout<< job << ", ";
     }
     std::cout << std::endl;
-    std::cout << std::endl;
+    for (const auto& tardiness: tardinessHistory){
+        std::cout<< tardiness << ", ";
+    }
+    std::cout<<std::endl;
 
 
     //////
@@ -86,9 +91,10 @@ int main(){
     for (auto pair: measuredTimesTabuWorkflow.processingTimes){
         total += pair.second;
     }
+    tardinessHistory.clear();
     std::cout<< "Completion time: " << total <<std::endl;
 
-    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, 8, 25, 1000, false);
+    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, tardinessHistory, 10, 8, 25, 1000, false);
     totalTardiness = tabuScheduler.getTotalTardiness(measuredTabuSchedule, measuredTimesTabuWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: measuredTabuSchedule){
@@ -96,13 +102,21 @@ int main(){
     }
 
     std::cout << std::endl;
-    std::cout << std::endl;
 
-    auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 435, 250, true);
-    for (int job: bestMeasuredTabuSchedule){
-        std::cout<< job << ", ";
+    for (const auto& tardiness: tardinessHistory){
+        std::cout<< tardiness << ", ";
     }
+    std::cout<<std::endl;
 
+    // auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 435, 250, true);
+    // for (int job: bestMeasuredTabuSchedule){
+    //     std::cout<< job << ", ";
+    // }
+
+    // auto minCostsOverGamme = tabuScheduler.getMinCostsOverGamma(measuredTimesTabuWorkflow, x0, 1, 50, 1, 21, 250);
+    // for (double cost: minCostsOverGamme){
+    //     std::cout<< cost << ", ";
+    // }
     ////
     //TESTING
     ////
