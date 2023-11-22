@@ -3,7 +3,7 @@
 #include <deque>
 #include <iostream>
 #include <algorithm>
-
+#include <tuple>
 
 double TabuScheduler::getTotalTardiness(std::vector<int>& schedule, Workflow& workflow){
         double costSoFar = 0;
@@ -18,16 +18,16 @@ double TabuScheduler::getTotalTardiness(std::vector<int>& schedule, Workflow& wo
     };
 
 
-int TabuScheduler::getNextAvailableSwap(int currSwapIdx, std::vector<int>& schedule, Workflow& workflow){
+int TabuScheduler::getNextAvailableSwap(int currSwapIdx, int& swapAttemptsSoFar, std::vector<int>& schedule, Workflow& workflow){
+    swapAttemptsSoFar++;
     int swapIdx = currSwapIdx % (schedule.size() - 1); // schedule.size() - 1 since we need to loop back before we reach the last job,
     int jobA = schedule[swapIdx];                       // i.e (3, 4) -> (1, 2)
     int jobB = schedule[swapIdx + 1];
     auto jobBDependencies = workflow.dependenciesPerJob[jobB];
-
-    while (jobBDependencies.find(jobA) != jobBDependencies.end()){
+    while (jobBDependencies.find(jobA) != jobBDependencies.end() && swapAttemptsSoFar < schedule.size()){
+        swapAttemptsSoFar++;
         swapIdx = (swapIdx + 1) % (schedule.size() - 1);
         // Went full circle. No possible adjacent swap without breaking dependencies
-        if (swapIdx == currSwapIdx) return -1;
         jobA = schedule[swapIdx];
         jobB = schedule[swapIdx + 1];
         jobBDependencies = workflow.dependenciesPerJob[jobB];
@@ -68,11 +68,13 @@ std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<i
         printAlgorithmState(k, y, g_best, tabuList, g_best, "",false);
         std::cout<<"----------------------------------------------"<<std::endl;
     }
-
+    int swapAttemptsSoFar;
     while (k < K){
-        int swapIdx = getNextAvailableSwap(swapIdx, y, workflow);
-        // No available adjacent swap
-        if (swapIdx == -1) return x_best;
+        swapAttemptsSoFar = 0;
+        swapIdx = getNextAvailableSwap(swapIdx, swapAttemptsSoFar, y, workflow);
+        // No available adjacent swap either if getNextAvailableSwaps returns -1, 
+        // or we have had more swaps attempts than the length of the schedule
+        if (swapAttemptsSoFar >= x_k.size()) return x_best;
         std::swap(y[swapIdx], y[swapIdx + 1]);
         double g_y = getTotalTardiness(y, workflow);
         double Delta = g_x_k - g_y;
@@ -87,15 +89,14 @@ std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<i
         bool pairInList = std::find(tabuList.begin(), tabuList.end(), swap_pair) != tabuList.end();
         swapIdx++;
         while (g_y >= g_best && (Delta <= -gamma || pairInList)){
-            k++;
             if (enablePrint){
                 printAlgorithmState(k, y, g_y, tabuList, g_best, swap_pair, pairInList);
             }
-            if (k >= K) return x_best;
             // reset y to x_k, before performing swap
             y = x_k;
-            swapIdx = getNextAvailableSwap(swapIdx, y, workflow);
-            if (swapIdx == -1) return x_best;
+            swapIdx = getNextAvailableSwap(swapIdx, swapAttemptsSoFar, y, workflow);
+            // No swaps possible. return current best.
+            if (swapAttemptsSoFar >= x_k.size()) return x_best;
             std::swap(y[swapIdx], y[swapIdx + 1]);
             g_y = getTotalTardiness(y, workflow);
             Delta = g_x_k - g_y;
@@ -131,28 +132,53 @@ std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<i
     return x_best;
 };
 
- std::vector<int> TabuScheduler::createScheduleSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint){
-    int best_gamma;
-    int best_L;
+
+// Sweeps gamma, and L, while keeping the <gamma, L> combinations that achieve the lowest cost
+// (can be multiple combinations) in a vector
+std::vector<int> TabuScheduler::createScheduleSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint){
+
     std::vector<int> bestSchedule;
     std::vector<int> currSchedule;
-    int g_best = getTotalTardiness(x0, workflow);
+    // List of <gamma, L, schedule> combinations which all achieve the lowest cost
+    std::vector<std::tuple<int, int, std::string>> bestParams; 
+    double g_best = getTotalTardiness(x0, workflow);
     for (int gamma = min_gamma; gamma <= max_gamma; gamma++){
         for (int L = min_L; L <= max_L; L++){
             currSchedule = createSchedule(workflow, x0, gamma, L, K, false);
-            int g = getTotalTardiness(currSchedule, workflow);
-            if (g <= g_best){
-                g_best = g;
+            double g = getTotalTardiness(currSchedule, workflow);
+            if (g == g_best){
                 bestSchedule = currSchedule;
-                best_gamma = gamma;
-                best_L = L;
+                bestParams.push_back(std::make_tuple(gamma, L, scheduleToString(currSchedule)));
+            }
+            else if(g < g_best){
+                g_best = g;
+                bestParams.clear();
+                bestSchedule = currSchedule;
+                bestParams.push_back(std::make_tuple(gamma, L, scheduleToString(currSchedule)));
             }
         }
     }
     if (enablePrint){
-        std::cout<< "best_gamma: "<< best_gamma << std::endl;
-        std::cout<< "best_L: "<< best_L << std::endl;
         std::cout<< "best_g: "<< g_best << std::endl;
+        std::cout<<"parameter combinations found: "<<bestParams.size()<<std::endl;
+        std::cout<< "----------------------------------------------" <<std::endl;
+        for (const auto& comb: bestParams){
+            std::cout<< "gamma: "<< std::get<0>(comb) <<std::endl;
+            std::cout<< "L: "<< std::get<1>(comb) <<std::endl;
+            std::cout<< "Schedule: "<< std::endl <<std::get<2>(comb) <<std::endl;
+            std::cout<< "----------------------------------------------" <<std::endl;
+        }
     }
     return bestSchedule;
  }
+
+//Util for converting vector<int> schedule to string
+std::string TabuScheduler::scheduleToString(std::vector<int>& schedule){
+        std::string strSchedule = "";
+        for (const auto& job: schedule){
+            strSchedule += (std::to_string(job) + ", ");
+        }
+        auto res = strSchedule.substr(0, strSchedule.length() - 2);
+        return res;
+    }
+ 

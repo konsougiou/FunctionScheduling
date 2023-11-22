@@ -11,7 +11,7 @@ public:
     Workflow(
         std::vector<std::vector<int> > edges, 
         std::unordered_map<std::string, double> processingTimePerType,
-        std::unordered_map<int, int> dueDates,
+        std::unordered_map<int, double> dueDates,
         std::unordered_map<int, std::string> nodeNames
         );
     // 0-indexed matrix
@@ -19,7 +19,7 @@ public:
 
     std::unordered_map<int, std::string> nodeNames;
 
-    std::unordered_map<int, int> dueDates;
+    std::unordered_map<int, double> dueDates;
 
     std::unordered_map<int, double> processingTimes;
 
