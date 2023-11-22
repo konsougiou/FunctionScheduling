@@ -96,7 +96,7 @@ int main(){
     std::cout << std::endl;
     std::cout << std::endl;
 
-    auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 30, 100, true);
+    auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 30, 2000, true);
         for (int job: bestMeasuredTabuSchedule){
         std::cout<< job << ", ";
     }

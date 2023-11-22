@@ -2,6 +2,7 @@
 #include <cmath>
 #include <deque>
 #include <iostream>
+#include <algorithm>
 
 
 double TabuScheduler::getTotalTardiness(std::vector<int>& schedule, Workflow& workflow){
