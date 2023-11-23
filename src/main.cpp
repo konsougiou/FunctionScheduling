@@ -94,7 +94,7 @@ int main(){
     tardinessHistory.clear();
     std::cout<< "Completion time: " << total <<std::endl;
 
-    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, tardinessHistory, 10, 8, 25, 1000, false);
+    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, tardinessHistory, 1, 1, 21, 250, false);
     totalTardiness = tabuScheduler.getTotalTardiness(measuredTabuSchedule, measuredTimesTabuWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: measuredTabuSchedule){
@@ -108,15 +108,16 @@ int main(){
     }
     std::cout<<std::endl;
 
-    // auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 435, 250, true);
-    // for (int job: bestMeasuredTabuSchedule){
-    //     std::cout<< job << ", ";
-    // }
+    auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 435, 250, true);
+    for (int job: bestMeasuredTabuSchedule){
+        std::cout<< job << ", ";
+    }
 
     // auto minCostsOverGamme = tabuScheduler.getMinCostsOverGamma(measuredTimesTabuWorkflow, x0, 1, 50, 1, 21, 250);
     // for (double cost: minCostsOverGamme){
     //     std::cout<< cost << ", ";
     // }
+    
     ////
     //TESTING
     ////
