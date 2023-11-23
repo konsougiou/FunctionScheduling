@@ -18,9 +18,9 @@ int main(){
     };
 
     std::unordered_map<std::string, double> measuredProcessingTimePerType = {
-        {"vii", 14.5901}, {"blur", 5.6323}, {"night", 18.5314},
-        {"onnx" ,2.7707}, {"emboss", 1.6893}, {"muse", 10.3133}, 
-        {"wave", 6.2833}
+        {"vii", 14.4762}, {"blur", 5.4955}, {"night", 18.6060},
+        {"onnx", 2.7349}, {"emboss", 1.6695}, {"muse", 10.3641}, 
+        {"wave", 6.3114}
     };
 
     std::unordered_map<std::string, double> preSetProcessingTimePerType = {
