@@ -1,3 +1,6 @@
+#ifndef WORKFLOW_HPP
+#define WORKFLOW_HPP
+
 #include <vector>
 #include <string>
 #include <unordered_set>
@@ -23,7 +26,7 @@ public:
 
     std::unordered_map<int, double> processingTimes;
 
-    // In the construcotr of the workflow, we find for each job, all the jobs in depends on.
+    // In the constructor of the workflow, we find for each job, all the jobs in depends on.
     // Although this introduces an bigO(numJobs^2) memory cost in the worst case, it saves a 
     // lot of runtime during the algorithm execution
     std::unordered_map<int, std::unordered_set<int> > dependenciesPerJob;
@@ -32,3 +35,5 @@ public:
 
     void populateDependenciesPerJob();
 };
+
+#endif

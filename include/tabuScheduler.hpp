@@ -14,7 +14,7 @@ public:
 
     std::vector<int> createSchedule(Workflow& workflow, std::vector<int> x0, int gamma, int L, int K, bool enablePrint);
 
-    std::vector<int> createScheduleSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint);
+    std::unordered_set<std::string> createSchedulesSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint);
 
     std::string scheduleToString(std::vector<int>& schedule);
 
