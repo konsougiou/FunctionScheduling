@@ -136,9 +136,9 @@ std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<i
 
 // Sweeps gamma, and L, while keeping the <gamma, L> combinations that achieve the lowest cost
 // (can be multiple combinations) in a vector
-std::vector<int> TabuScheduler::createScheduleSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint){
+std::unordered_set<std::string> TabuScheduler::createSchedulesSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint){
 
-    std::vector<int> bestSchedule;
+    std::unordered_set<std::string> bestSchedules;
     std::vector<int> currSchedule;
     // List of <gamma, L, schedule> combinations which all achieve the lowest cost
     std::vector<std::tuple<int, int, std::string>> bestParams; 
@@ -149,13 +149,16 @@ std::vector<int> TabuScheduler::createScheduleSweepParams(Workflow& workflow, st
             currSchedule = createSchedule(workflow, x0, dummy, 0, gamma, L, K, false);
             double g = getTotalTardiness(currSchedule, workflow);
             if (g == g_best){
-                bestSchedule = currSchedule;
+                std::string strSchedule = scheduleToString(currSchedule);
+                bestSchedules.insert(strSchedule);
                 bestParams.push_back(std::make_tuple(gamma, L, scheduleToString(currSchedule)));
             }
             else if(g < g_best){
                 g_best = g;
                 bestParams.clear();
-                bestSchedule = currSchedule;
+                bestSchedules.clear();
+                std::string strSchedule = scheduleToString(currSchedule);
+                bestSchedules.insert(strSchedule);
                 bestParams.push_back(std::make_tuple(gamma, L, scheduleToString(currSchedule)));
             }
         }
@@ -165,26 +168,14 @@ std::vector<int> TabuScheduler::createScheduleSweepParams(Workflow& workflow, st
         std::cout<<"parameter combinations found: "<<bestParams.size()<<std::endl;
         std::cout<< "----------------------------------------------" <<std::endl;
         for (const auto& comb: bestParams){
-            std::cout<< "gamma: "<< std::get<0>(comb) <<std::endl;
-            std::cout<< "L: "<< std::get<1>(comb) <<std::endl;
+            std::cout<< "gamma: "<< std::get<0>(comb) <<" ";
+            std::cout<< "L: "<< std::get<1>(comb) <<" ";
             std::cout<< "Schedule: "<< std::endl <<std::get<2>(comb) <<std::endl;
             std::cout<< "----------------------------------------------" <<std::endl;
         }
     }
-    return bestSchedule;
- };
-
-std::vector<double> TabuScheduler::getMinCostsOverGamma(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int step,  int L, int K){
-    std::vector<double> minCosts;
-    std::vector<int> currSchedule;
-    for (int gamma = min_gamma; gamma <= max_gamma; gamma += step){
-        std::vector<double> dummy;
-        currSchedule = createSchedule(workflow, x0, dummy, 0, gamma, L, K, false);
-        double minTardiness = getTotalTardiness(currSchedule, workflow);
-        minCosts.push_back(minTardiness);
-    }
-    return minCosts;
-};
+    return bestSchedules;
+ }
 
 //Util for converting vector<int> schedule to string
 std::string TabuScheduler::scheduleToString(std::vector<int>& schedule){

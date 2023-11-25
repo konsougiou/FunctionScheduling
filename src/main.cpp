@@ -1,5 +1,9 @@
 #include <iostream>
 #include "../include/tabuScheduler.hpp"
+#include "../include/vnsScheduler.h"
+#include <iostream>
+#include <chrono>
+
 
 
 
@@ -63,7 +67,7 @@ int main(){
     std::vector<double> tardinessHistory;
 
     auto tabuScheduler = TabuScheduler();
-    auto tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, tardinessHistory, 10, 10, 20, 1000, false);
+    std::vector<int> tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 1000, false);
     double totalTardiness = tabuScheduler.getTotalTardiness(tabuSchedule, tabuWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: tabuSchedule){
@@ -81,21 +85,22 @@ int main(){
     //////
 
 
-    Workflow measuredTimesTabuWorkflow = Workflow(
+    Workflow measuredTimesWorkflow = Workflow(
             tabuEdges, 
             measuredProcessingTimePerType,
             tabuDueDates,
             tabuNodeNames);
 
     double total = 0;
-    for (auto pair: measuredTimesTabuWorkflow.processingTimes){
+    for (auto pair: measuredTimesWorkflow.processingTimes){
         total += pair.second;
     }
     tardinessHistory.clear();
     std::cout<< "Completion time: " << total <<std::endl;
 
-    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, tardinessHistory, 1, 1, 21, 250, false);
-    totalTardiness = tabuScheduler.getTotalTardiness(measuredTabuSchedule, measuredTimesTabuWorkflow);
+    std::vector<int> measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesWorkflow, x0, 8, 25, 1000, false);
+    std::vector<int> tmpSchedule = {30, 20, 14, 19, 10, 4, 3, 23, 9, 8, 22, 21, 18, 7, 6, 17, 16, 29, 28, 27, 13, 26, 12, 25, 24, 5, 2, 15, 11, 1, 31};
+    totalTardiness = tabuScheduler.getTotalTardiness(tmpSchedule, measuredTimesWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: measuredTabuSchedule){
         std::cout<< job << ", ";
@@ -108,16 +113,57 @@ int main(){
     }
     std::cout<<std::endl;
 
-    auto bestMeasuredTabuSchedule = tabuScheduler.createScheduleSweepParams(measuredTimesTabuWorkflow, x0, 1, 50, 0, 435, 250, true);
-    for (int job: bestMeasuredTabuSchedule){
-        std::cout<< job << ", ";
+    // auto bestMeasuredTabuSchedules = tabuScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 50, 0, 435, 190, true);
+    // std::cout<< bestMeasuredTabuSchedules.size()<<std::endl;
+    // for (auto schedule: bestMeasuredTabuSchedules){
+    //     std::cout<< schedule << std::endl;
+    // }
+
+    ////
+    //VNS
+    ////
+
+
+
+
+    VNSScheduler vnsScheduler = VNSScheduler();
+    std::vector<int> jobsToIdx(x0.size() + 1, 0);
+    for (int i = 0; i < x0.size(); i++){
+        int job = x0[i];
+        jobsToIdx[job] = i;
     }
 
-    // auto minCostsOverGamme = tabuScheduler.getMinCostsOverGamma(measuredTimesTabuWorkflow, x0, 1, 50, 1, 21, 250);
-    // for (double cost: minCostsOverGamme){
-    //     std::cout<< cost << ", ";
+    std::vector<int> tmp = vnsScheduler.getRandomFeasibelSchedule(measuredTimesWorkflow);
+    std::cout<<"tmp: "<<std::endl;
+    for (const auto& job: tmp){
+        std::cout<<job<<", ";
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 2000, 1000);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Execution time: " << duration << " microseconds" << std::endl;
+
+    for (const auto& job: vnsOptimalSchedule){
+        std::cout<<job<<", ";
+    }
+    std::cout<<std::endl;
+    std::cout<<vnsScheduler.getTotalTardiness(vnsOptimalSchedule, measuredTimesWorkflow)<< std::endl;
+    std::cout<<std::endl;
+    std::cout<<vnsScheduler.getTotalTardiness(x0, measuredTimesWorkflow)<< std::endl;
+
+    // for (int i = 10; i < 240; i++){
+    //     auto vec = vnsScheduler.getNextSchedule(measuredTimesWorkflow, x0, jobsToIdx, i, 100000);
+    //     std::cout<< "measured distance: "<<vnsScheduler.getDistanceFromX0(vec, jobsToIdx)<<std::endl;
+    //     for (auto job: vec){
+    //         std::cout<<job<<", ";
+    //     }
+    //     std::cout<<std::endl;
     // }
-    
+
     ////
     //TESTING
     ////
@@ -127,10 +173,12 @@ int main(){
         {"onnx" ,4.0}};
 
     std::unordered_map<int, double> testTabuDueDates = {
-      {1, 4}, {2, 2}, {3, 1}, {4, 12}};
+      {1, 4}, {2, 2}, {3, 1}, {4, 12}, {5, 12}, {6, 12}, {7, 12}, {8, 12}, {9, 12}, {10, 12}, {11, 12}, {12, 12}, {13, 12}, {14, 12}, {15, 12}
+    };
 
     std::unordered_map<int, std::string> testTabuNodeNames = {
-        {1, "vii"}, {2, "blur"}, {3, "night"}, {4, "onnx"} 
+        {1, "vii"}, {2, "blur"}, {3, "night"}, {4, "onnx"} , {5, "onnx"}, {6, "onnx"}, {7, "onnx"}, {8, "onnx"}, {9, "onnx"}, {11, "onnx"},
+        {12, "onnx"}, {13, "onnx"}, {14, "onnx"}, {15, "onnx"}
     }; 
     std::vector<std::vector<int> > testTabuEdges;
 
@@ -140,15 +188,10 @@ int main(){
             testTabuDueDates,
             testTabuNodeNames);
 
-    x0 = {2, 1, 4, 3};
+    x0 = {2, 1, 4, 3, 5, 8, 6, 7};
 
-    auto testTaboScheduler = TabuScheduler();
-    //schedule = testTaboScheduler.createSchedule(testTabuWorkflow, x0, 10, 5, 20, true);
-    //std::cout<< testTaboScheduler.getTotalTardiness(schedule, testTabuWorkflow) <<std::endl;
-    // for (int job: schedule){
-    //     std::cout<< job << ", ";
-    // }
-
+    // Print the duration
+    std::cout << "Execution time: " << duration << " microseconds" << std::endl;
 
     return 0;
 }
