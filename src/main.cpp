@@ -65,7 +65,7 @@ int main(){
                             17, 15, 6, 24, 16, 5, 11, 2, 1, 31};
 
     auto tabuScheduler = TabuScheduler();
-    auto tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 1000, false);
+    std::vector<int> tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 1000, false);
     double totalTardiness = tabuScheduler.getTotalTardiness(tabuSchedule, tabuWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: tabuSchedule){
@@ -80,31 +80,30 @@ int main(){
     //////
 
 
-    Workflow measuredTimesTabuWorkflow = Workflow(
+    Workflow measuredTimesWorkflow = Workflow(
             tabuEdges, 
             measuredProcessingTimePerType,
             tabuDueDates,
             tabuNodeNames);
 
     double total = 0;
-    for (auto pair: measuredTimesTabuWorkflow.processingTimes){
+    for (auto pair: measuredTimesWorkflow.processingTimes){
         total += pair.second;
     }
     std::cout<< "Completion time: " << total <<std::endl;
 
-    auto measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesTabuWorkflow, x0, 8, 25, 1000, false);
+    std::vector<int> measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesWorkflow, x0, 8, 25, 1000, false);
     std::vector<int> tmpSchedule = {30, 20, 14, 19, 10, 4, 3, 23, 9, 8, 22, 21, 18, 7, 6, 17, 16, 29, 28, 27, 13, 26, 12, 25, 24, 5, 2, 15, 11, 1, 31};
-    totalTardiness = tabuScheduler.getTotalTardiness(tmpSchedule, measuredTimesTabuWorkflow);
+    totalTardiness = tabuScheduler.getTotalTardiness(tmpSchedule, measuredTimesWorkflow);
     std::cout<< totalTardiness <<std::endl;
     for (int job: measuredTabuSchedule){
         std::cout<< job << ", ";
     }
 
-
     std::cout << std::endl;
     std::cout << std::endl;
 
-    // auto bestMeasuredTabuSchedules = tabuScheduler.createSchedulesSweepParams(measuredTimesTabuWorkflow, x0, 0, 50, 0, 435, 190, true);
+    // auto bestMeasuredTabuSchedules = tabuScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 50, 0, 435, 190, true);
     // std::cout<< bestMeasuredTabuSchedules.size()<<std::endl;
     // for (auto schedule: bestMeasuredTabuSchedules){
     //     std::cout<< schedule << std::endl;
@@ -118,7 +117,42 @@ int main(){
 
 
     VNSScheduler vnsScheduler = VNSScheduler();
+    std::vector<int> jobsToIdx(x0.size() + 1, 0);
+    for (int i = 0; i < x0.size(); i++){
+        int job = x0[i];
+        jobsToIdx[job] = i;
+    }
 
+    std::vector<int> tmp = vnsScheduler.getRandomFeasibelSchedule(measuredTimesWorkflow);
+    std::cout<<"tmp: "<<std::endl;
+    for (const auto& job: tmp){
+        std::cout<<job<<", ";
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 2000, 1000);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Execution time: " << duration << " microseconds" << std::endl;
+
+    for (const auto& job: vnsOptimalSchedule){
+        std::cout<<job<<", ";
+    }
+    std::cout<<std::endl;
+    std::cout<<vnsScheduler.getTotalTardiness(vnsOptimalSchedule, measuredTimesWorkflow)<< std::endl;
+    std::cout<<std::endl;
+    std::cout<<vnsScheduler.getTotalTardiness(x0, measuredTimesWorkflow)<< std::endl;
+
+    // for (int i = 10; i < 240; i++){
+    //     auto vec = vnsScheduler.getNextSchedule(measuredTimesWorkflow, x0, jobsToIdx, i, 100000);
+    //     std::cout<< "measured distance: "<<vnsScheduler.getDistanceFromX0(vec, jobsToIdx)<<std::endl;
+    //     for (auto job: vec){
+    //         std::cout<<job<<", ";
+    //     }
+    //     std::cout<<std::endl;
+    // }
 
     ////
     //TESTING
@@ -146,26 +180,8 @@ int main(){
 
     x0 = {2, 1, 4, 3, 5, 8, 6, 7};
 
-    auto start = std::chrono::high_resolution_clock::now();
-
-    auto allFeasibleSchedules = vnsScheduler.getAllFeasibleSchedules(measuredTimesTabuWorkflow);
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-
     // Print the duration
     std::cout << "Execution time: " << duration << " microseconds" << std::endl;
-
-    std::cout<< allFeasibleSchedules.size() << std::endl;
-    // for (const auto& schedule: allFeasibleSchedules){
-    //     for (const auto& job: schedule){
-    //         std::cout<< job <<", ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
-
-    //56928603 micro
-    //122250
 
     return 0;
 }
