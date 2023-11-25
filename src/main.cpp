@@ -64,6 +64,8 @@ int main(){
                             22, 3, 27, 28, 8, 7, 19, 21, 26, 18, 25,
                             17, 15, 6, 24, 16, 5, 11, 2, 1, 31};
 
+    std::vector<double> tardinessHistory;
+
     auto tabuScheduler = TabuScheduler();
     std::vector<int> tabuSchedule = tabuScheduler.createSchedule(tabuWorkflow, x0, 10, 20, 1000, false);
     double totalTardiness = tabuScheduler.getTotalTardiness(tabuSchedule, tabuWorkflow);
@@ -72,7 +74,10 @@ int main(){
         std::cout<< job << ", ";
     }
     std::cout << std::endl;
-    std::cout << std::endl;
+    for (const auto& tardiness: tardinessHistory){
+        std::cout<< tardiness << ", ";
+    }
+    std::cout<<std::endl;
 
 
     //////
@@ -90,6 +95,7 @@ int main(){
     for (auto pair: measuredTimesWorkflow.processingTimes){
         total += pair.second;
     }
+    tardinessHistory.clear();
     std::cout<< "Completion time: " << total <<std::endl;
 
     std::vector<int> measuredTabuSchedule = tabuScheduler.createSchedule(measuredTimesWorkflow, x0, 8, 25, 1000, false);
@@ -101,7 +107,11 @@ int main(){
     }
 
     std::cout << std::endl;
-    std::cout << std::endl;
+
+    for (const auto& tardiness: tardinessHistory){
+        std::cout<< tardiness << ", ";
+    }
+    std::cout<<std::endl;
 
     // auto bestMeasuredTabuSchedules = tabuScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 50, 0, 435, 190, true);
     // std::cout<< bestMeasuredTabuSchedules.size()<<std::endl;
