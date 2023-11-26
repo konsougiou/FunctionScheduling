@@ -135,7 +135,7 @@ std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<i
 
 // Sweeps gamma, and L, while keeping the <gamma, L> combinations that achieve the lowest cost
 // (can be multiple combinations) in a vector
-std::unordered_set<std::string> TabuScheduler::createSchedulesSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint){
+std::vector<std::vector<int>> TabuScheduler::createSchedulesSweepParams(Workflow& workflow, std::vector<int> x0, int min_gamma, int max_gamma, int min_L, int max_L, int K, bool enablePrint){
 
     std::unordered_set<std::string> bestSchedules;
     std::vector<int> currSchedule;
@@ -173,7 +173,11 @@ std::unordered_set<std::string> TabuScheduler::createSchedulesSweepParams(Workfl
             std::cout<< "----------------------------------------------" <<std::endl;
         }
     }
-    return bestSchedules;
+    std::vector<std::vector<int>> schedules;
+    for (auto& schedule: bestSchedules){
+        schedules.push_back(stringToSchedule(schedule));
+    }
+    return schedules;
  }
 
 //Util for converting vector<int> schedule to string
@@ -185,4 +189,18 @@ std::string TabuScheduler::scheduleToString(std::vector<int>& schedule){
         auto res = strSchedule.substr(0, strSchedule.length() - 2);
         return res;
     };
+
+std::vector<int> TabuScheduler::stringToSchedule(std::string strSchedule){
+    int commaIdx = strSchedule.find(',');
+    std::vector<int> schedule;
+    std::string word;
+    while (commaIdx != std::string::npos){
+        std::string word = strSchedule.substr(0, commaIdx);
+        strSchedule.erase(0, commaIdx + 2);
+        schedule.push_back(stoi(word));
+        commaIdx = strSchedule.find(',');
+    }
+    word = stoi(strSchedule);
+    return schedule;
+}
  
