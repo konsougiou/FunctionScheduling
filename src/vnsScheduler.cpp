@@ -5,8 +5,7 @@
 #include <algorithm>
 
 
-
-std::vector<int> VNSScheduler::createSchedule(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters){
+std::vector<int> VNSScheduler::createScheduleRefined(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters){
 
     double best_g = getTotalTardiness(x0, workflow);
     std::vector<int> bestSchedule = x0;
@@ -19,8 +18,71 @@ std::vector<int> VNSScheduler::createSchedule(Workflow& workflow, std::vector<in
         int job = x0[i];
         x0JobToIdx[job] = i;
     }
+    int maxPossibleDistance = getMaxPossibleDistance(x0.size());
+    int neighbouringRadiusIncrease = (maxPossibleDistance / 2) / (L - 1);
+    std::vector<int> pickedSchedule;
+    std::vector<int> refineCandiateSchedule;
+    while (k <= K){
+        int i = 1;
+        if (k % 100 == 0){
+            std::cout<<k<<std::endl;
+            std::cout<<best_g<<std::endl;
+        }
+        int radius = neighbouringRadiusIncrease;
+        while (i < L){
+            pickedSchedule = getNextSchedule(workflow, x0, x0JobToIdx, radius, maxIters);
+            double tardiness = getTotalTardiness(pickedSchedule, workflow);
+            int refineAttemps = 0;
+            //Check if we can find a better schedule within this neighbourhoud
+            while(refineAttemps < 3){
+                refineCandiateSchedule = getNextSchedule(workflow, x0, x0JobToIdx, radius, maxIters);
+                double newTardiness = getTotalTardiness(pickedSchedule, workflow);
+                if (newTardiness < tardiness){
+                    pickedSchedule = refineCandiateSchedule;
+                    tardiness = newTardiness;
+                    break;
+                }
+                refineAttemps++;
+            }
 
-    int neighbouringRadiusIncrease = 240 / (L - 1);
+            if (tardiness < best_g){
+                best_g = tardiness;
+                bestSchedule = pickedSchedule;
+            }
+            radius += neighbouringRadiusIncrease;
+            i++;
+        }
+        // Finally select from NL, i.e the whole feasible set
+        pickedSchedule = getRandomFeasibelSchedule(workflow);
+        double tardiness = getTotalTardiness(pickedSchedule, workflow);
+        if (tardiness < best_g){
+            best_g = tardiness;
+            bestSchedule = pickedSchedule;
+        }
+        k++;
+    }
+    return bestSchedule;
+    }
+
+
+
+std::vector<int> VNSScheduler::createSchedule(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters){
+
+    double best_g = getTotalTardiness(x0, workflow);
+    std::vector<int> bestSchedule = x0;
+    int k = 0;
+    if (L == 1) return getRandomFeasibelSchedule(workflow);
+    std::unordered_set<std::string> visitedList;
+
+    // the vector storing the index of each job in X0
+    std::vector<int> x0JobToIdx(x0.size() + 1, 0);
+    for (int i = 0; i < x0.size(); i++){
+        int job = x0[i];
+        x0JobToIdx[job] = i;
+    }
+
+    int maxPossibleDistance = getMaxPossibleDistance(x0.size());
+    int neighbouringRadiusIncrease = (maxPossibleDistance / 2) / (L - 1);
     std::vector<int> pickedSchedule;
     while (k <= K){
         int i = 1;
@@ -31,6 +93,8 @@ std::vector<int> VNSScheduler::createSchedule(Workflow& workflow, std::vector<in
         int radius = neighbouringRadiusIncrease;
         while (i < L){
             pickedSchedule = getNextSchedule(workflow, x0, x0JobToIdx, radius, maxIters);
+            // Refine pick based on 
+
             double tardiness = getTotalTardiness(pickedSchedule, workflow);
             if (tardiness < best_g){
                 best_g = tardiness;
@@ -155,7 +219,22 @@ int VNSScheduler::getDistanceFromX0(std::vector<int>& schedule, std::vector<int>
         distance += std::abs(IdxInX0 - i);
     }
     return distance;
-}
+};
+
+// get maxium possible distance between to vectors of size n.
+// Distance is defined as the absolute distance between the index of each element in the first vector,
+// compared to its index in the second vector, summed over all elements
+// This is achieved when the one vecotr is the reverse of the second, and the distance between them
+// can be expressed as an arithmetic series sum.
+int VNSScheduler::getMaxPossibleDistance(int size){
+    int total = 0;
+    int term = (size + 1) % 2;
+    while(term <= size - 1){
+        total += term;
+        term += 2;
+    }
+    return total * 2;
+};
 
 double VNSScheduler::getTotalTardiness(std::vector<int>& schedule, Workflow& workflow){
         double costSoFar = 0;
