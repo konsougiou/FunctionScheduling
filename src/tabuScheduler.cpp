@@ -54,7 +54,7 @@ void TabuScheduler::printAlgorithmState(int k, std::vector<int>& y, double g_y, 
 
 
 
-std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<int> x0, std::vector<double>& tardinessHistory, int samplingFactor, int gamma, int L, int K, bool enablePrint){
+std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<int> x0, int gamma, int L, int K, bool enablePrint){
     //representing job pairs as strings of the format "jobA_jobB", where jobA < jobB, representing both A<->B and B<->A swaps
     std::deque<std::string> tabuList;
     int k = 0;
@@ -117,7 +117,6 @@ std::vector<int> TabuScheduler::createSchedule(Workflow& workflow, std::vector<i
         }
         x_k = y;
         g_x_k = g_y;
-        if (k % samplingFactor == 0) tardinessHistory.push_back(g_x_k);
         k++;
 
         if (enablePrint){
@@ -146,7 +145,7 @@ std::unordered_set<std::string> TabuScheduler::createSchedulesSweepParams(Workfl
     for (int gamma = min_gamma; gamma <= max_gamma; gamma++){
         for (int L = min_L; L <= max_L; L++){
             std::vector<double> dummy;
-            currSchedule = createSchedule(workflow, x0, dummy, 0, gamma, L, K, false);
+            currSchedule = createSchedule(workflow, x0, gamma, L, K, false);
             double g = getTotalTardiness(currSchedule, workflow);
             if (g == g_best){
                 std::string strSchedule = scheduleToString(currSchedule);
