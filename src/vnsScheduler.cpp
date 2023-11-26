@@ -5,7 +5,7 @@
 #include <algorithm>
 
 
-std::vector<int> VNSScheduler::createScheduleRefined(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters){
+std::vector<int> VNSScheduler::createScheduleRefined(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters, int maxRefineAttempts){
 
     double best_g = getTotalTardiness(x0, workflow);
     std::vector<int> bestSchedule = x0;
@@ -34,9 +34,9 @@ std::vector<int> VNSScheduler::createScheduleRefined(Workflow& workflow, std::ve
             double tardiness = getTotalTardiness(pickedSchedule, workflow);
             int refineAttemps = 0;
             //Check if we can find a better schedule within this neighbourhoud
-            while(refineAttemps < 3){
+            while(refineAttemps <  maxRefineAttempts){
                 refineCandiateSchedule = getNextSchedule(workflow, x0, x0JobToIdx, radius, maxIters);
-                double newTardiness = getTotalTardiness(pickedSchedule, workflow);
+                double newTardiness = getTotalTardiness(refineCandiateSchedule, workflow);
                 if (newTardiness < tardiness){
                     pickedSchedule = refineCandiateSchedule;
                     tardiness = newTardiness;
@@ -55,6 +55,19 @@ std::vector<int> VNSScheduler::createScheduleRefined(Workflow& workflow, std::ve
         // Finally select from NL, i.e the whole feasible set
         pickedSchedule = getRandomFeasibelSchedule(workflow);
         double tardiness = getTotalTardiness(pickedSchedule, workflow);
+
+        //Refine
+        int refineAttemps = 0;
+        while(refineAttemps <  maxRefineAttempts){
+            refineCandiateSchedule = getNextSchedule(workflow, x0, x0JobToIdx, radius, maxIters);
+            double newTardiness = getTotalTardiness(refineCandiateSchedule, workflow);
+            if (newTardiness < tardiness){
+                pickedSchedule = refineCandiateSchedule;
+                tardiness = newTardiness;
+                break;
+            }
+            refineAttemps++;
+        }
         if (tardiness < best_g){
             best_g = tardiness;
             bestSchedule = pickedSchedule;

@@ -127,7 +127,6 @@ int main(){
 
     VNSScheduler vnsScheduler = VNSScheduler();
 
-    std::cout<<vnsScheduler.getMaxPossibleDistance(31)<<std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 1000, 1000);
@@ -147,7 +146,7 @@ int main(){
     std::cout<<"EXERCISE 3.3 VNS REFINED SCHEDULE"<<std::endl;
     start = std::chrono::high_resolution_clock::now();
 
-    std::vector<int> vnsOptimalRefinedSchedule = vnsScheduler.createScheduleRefined(measuredTimesWorkflow, x0, 10, 1000, 1000);
+    std::vector<int> vnsOptimalRefinedSchedule = vnsScheduler.createScheduleRefined(measuredTimesWorkflow, x0, 10, 1000, 1000, 3);
 
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();

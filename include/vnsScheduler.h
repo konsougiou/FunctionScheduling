@@ -19,7 +19,7 @@ public:
 
     std::vector<int> createSchedule(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters);
 
-    std::vector<int> createScheduleRefined(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters);
+    std::vector<int> createScheduleRefined(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters, int maxRefineAttempts);
 
     std::vector<int> getRandomFeasibelSchedule(Workflow& workflow);
 
