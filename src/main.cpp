@@ -108,7 +108,7 @@ int main(){
     std::cout<<"Measured time schedule total duration: "<<total<<std::endl;
 
     std::cout<<  "Parameters; gamma: 0 to 50,  L: 0 to 435, K: 190" <<std::endl;
-    auto bestMeasuredTabuSchedules = tabuScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 50, 0, 435, 190, true);
+    auto bestMeasuredTabuSchedules = tabuScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 50, 0, 435, 190, false);
     std::cout<< "Minimum tardiness: "<<tabuScheduler.getTotalTardiness(bestMeasuredTabuSchedules[0], measuredTimesWorkflow)<<std::endl;
     std::cout<<"Number of optimal schedules found: "<<std::endl;
     std::cout<< bestMeasuredTabuSchedules.size()<<std::endl;
@@ -129,7 +129,7 @@ int main(){
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 1000, 1000, true);
+    std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 1000, 1000, false);
 
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -161,17 +161,19 @@ int main(){
     }
     std::cout<<std::endl;
 
-    std::cout<<"EXERCISE 3.3 VNS SWEEPING PARAMETERS"<<std::endl;
 
-    std::cout<<  "Parameters; L: 1 to 10,  refineAttempts: 0 to 3, maxIters: 1000" <<std::endl;
-    auto bestVNSSchedules = vnsScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 10, 500, 1000, 0, 3,  true);
-    std::cout<< "Minimum tardiness: "<<vnsScheduler.getTotalTardiness(bestVNSSchedules[0], measuredTimesWorkflow)<<std::endl;
-    std::cout<<"Number of optimal schedules found: "<<std::endl;
-    std::cout<< bestVNSSchedules.size()<<std::endl;
-    std::cout<<"Best schedules: "<<std::endl;
-    for (auto schedule: bestVNSSchedules){
-        std::cout<< vnsScheduler.iterableToString(schedule) << std::endl;
-    }
+    std::cout<<"EXERCISE 3.3 VNS SWEEPING PARAMETERS"<<std::endl;
+    // Parameter sweep excluded due to execution time reasosns - can be commmented in - if desired
+
+    // std::cout<<  "Parameters; L: 1 to 10,  refineAttempts: 0 to 3, maxIters: 1000" <<std::endl;
+    // auto bestVNSSchedules = vnsScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 10, 500, 1000, 0, 3,  false);
+    // std::cout<< "Minimum tardiness: "<<vnsScheduler.getTotalTardiness(bestVNSSchedules[0], measuredTimesWorkflow)<<std::endl;
+    // std::cout<<"Number of optimal schedules found: "<<std::endl;
+    // std::cout<< bestVNSSchedules.size()<<std::endl;
+    // std::cout<<"Best schedules: "<<std::endl;
+    // for (auto schedule: bestVNSSchedules){
+    //     std::cout<< vnsScheduler.iterableToString(schedule) << std::endl;
+    // }
 
     return 0;
 }

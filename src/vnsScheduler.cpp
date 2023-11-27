@@ -107,7 +107,9 @@ std::vector<int> VNSScheduler::createSchedule(Workflow& workflow, std::vector<in
         while (i < L){
             pickedSchedule = getNextSchedule(workflow, x0, x0JobToIdx, radius, maxIters);
             double tardiness = getTotalTardiness(pickedSchedule, workflow);
-            printAlgorithmState(k, i, L, best_g, tardiness, pickedSchedule);
+            if (enablePrint){
+                printAlgorithmState(k, i, L, best_g, tardiness, pickedSchedule);
+            }
             if (tardiness < best_g){
                 best_g = tardiness;
                 bestSchedule = pickedSchedule;
@@ -118,7 +120,9 @@ std::vector<int> VNSScheduler::createSchedule(Workflow& workflow, std::vector<in
         // Finally select from NL, i.e the whole feasible set
         pickedSchedule = getRandomFeasibelSchedule(workflow);
         double tardiness = getTotalTardiness(pickedSchedule, workflow);
-        printAlgorithmState(k, L, L, best_g, tardiness, pickedSchedule);
+        if (enablePrint){
+            printAlgorithmState(k, L, L, best_g, tardiness, pickedSchedule);
+        } 
         if (tardiness < best_g){
             best_g = tardiness;
             bestSchedule = pickedSchedule;
