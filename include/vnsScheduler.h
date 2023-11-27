@@ -17,11 +17,17 @@ public:
 
     int getDistanceFromX0(std::vector<int>& schedule, std::vector<int>& x0JobToIdx);
 
-    std::vector<int> createSchedule(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters);
+    std::vector<int> createSchedule(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters, bool enablePrint);
 
     std::vector<int> createScheduleRefined(Workflow& workflow, std::vector<int>& x0, int L, int K, int maxIters, int maxRefineAttempts);
 
     std::vector<int> getRandomFeasibelSchedule(Workflow& workflow);
 
+    std::vector<std::vector<int>> createSchedulesSweepParams(Workflow& workflow, std::vector<int>& x0, int min_L,int max_L, int K, int maxIters, int minRefineSteps, int maxRefineSteps,  bool enablePrint);
+
     int getMaxPossibleDistance(int size);
+
+    std::vector<int> stringToSchedule(std::string);
+
+    void printAlgorithmState(int k, int i, int L, double best_g, double curr_g, std::vector<int>& pickedSchedule);
 };

@@ -23,5 +23,4 @@ public:
     std::string scheduleToString(std::vector<int>& schedule);
 
     std::vector<int> stringToSchedule(std::string);
-
 };
