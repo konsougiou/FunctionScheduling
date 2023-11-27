@@ -129,7 +129,8 @@ int main(){
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 1000, 1000);
+    std::vector<int> vnsOptimalSchedule = vnsScheduler.createSchedule(measuredTimesWorkflow, x0, 10, 1000, 1000, true);
+
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -159,6 +160,18 @@ int main(){
         std::cout<<job<<", ";
     }
     std::cout<<std::endl;
+
+    std::cout<<"EXERCISE 3.3 VNS SWEEPING PARAMETERS"<<std::endl;
+
+    std::cout<<  "Parameters; L: 1 to 10,  refineAttempts: 0 to 3, maxIters: 1000" <<std::endl;
+    auto bestVNSSchedules = vnsScheduler.createSchedulesSweepParams(measuredTimesWorkflow, x0, 0, 10, 500, 1000, 0, 3,  true);
+    std::cout<< "Minimum tardiness: "<<vnsScheduler.getTotalTardiness(bestVNSSchedules[0], measuredTimesWorkflow)<<std::endl;
+    std::cout<<"Number of optimal schedules found: "<<std::endl;
+    std::cout<< bestVNSSchedules.size()<<std::endl;
+    std::cout<<"Best schedules: "<<std::endl;
+    for (auto schedule: bestVNSSchedules){
+        std::cout<< vnsScheduler.iterableToString(schedule) << std::endl;
+    }
 
     return 0;
 }
